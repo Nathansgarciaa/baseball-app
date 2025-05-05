@@ -1,17 +1,24 @@
-import React from 'react';
-import ReactDOM from 'react-dom/client';
-import './index.css';
-import App from './App';
-import reportWebVitals from './reportWebVitals';
+const express = require('express');
+const cors = require('cors');
+const db = require('./db');
 
-const root = ReactDOM.createRoot(document.getElementById('root'));
-root.render(
-  <React.StrictMode>
-    <App />
-  </React.StrictMode>
-);
+const app = express();
+const PORT = 5000;
 
-// If you want to start measuring performance in your app, pass a function
-// to log results (for example: reportWebVitals(console.log))
-// or send to an analytics endpoint. Learn more: https://bit.ly/CRA-vitals
-reportWebVitals();
+app.use(cors());
+app.use(express.json()); // parse JSON requests
+
+// TEST: Get all teams
+app.get('/teams', async (req, res) => {
+  try {
+    const [rows] = await db.query('SELECT * FROM team');
+    res.json(rows);
+  } catch (err) {
+    console.error('Error querying teams:', err);
+    res.status(500).json({ error: 'Database error' });
+  }
+});
+
+app.listen(PORT, () => {
+  console.log(`Server running on http://localhost:${PORT}`);
+});

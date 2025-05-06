@@ -1,42 +1,56 @@
+body {
+  margin: 0;
+  font-family: 'Segoe UI', sans-serif;
+}
+
 .home-container {
-    text-align: center;
-    padding: 60px;
-    font-family: 'Segoe UI', sans-serif;
-    background-color: #f4f6f9;
-    min-height: 100vh;
-  }
-  
-  h1 {
-    margin-bottom: 10px;
-    color: #222;
-  }
-  
-  p {
-    font-size: 18px;
-    color: #555;
-  }
-  
-  .button-group {
-    margin-top: 40px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 20px;
-  }
-  
-  .button-group button {
-    width: 220px;
-    padding: 14px 0;
-    font-size: 16px;
-    background-color: #007bff;
-    color: white;
-    border: none;
-    border-radius: 10px;
-    cursor: pointer;
-    transition: background 0.3s ease;
-  }
-  
-  .button-group button:hover {
-    background-color: #0056b3;
-  }
-  
+  background: linear-gradient(135deg, #6a11cb, #2575fc);
+  min-height: 100vh;
+  padding: 40px 20px;
+  color: white;
+  text-align: center;
+}
+
+.header .app-title {
+  font-size: 48px;
+  margin-bottom: 10px;
+  font-weight: bold;
+  letter-spacing: 1px;
+}
+
+.header .subheading {
+  font-size: 18px;
+  color: #ddd;
+  margin-bottom: 40px;
+}
+
+.team-scroll {
+  display: flex;
+  overflow-x: auto;
+  gap: 20px;
+  padding-bottom: 10px;
+  justify-content: flex-start;
+  padding-left: 10px;
+}
+
+.team-card {
+  min-width: 200px;
+  background: white;
+  color: #333;
+  border-radius: 15px;
+  padding: 20px;
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+  flex-shrink: 0;
+  text-align: center;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+.team-card:hover {
+  transform: scale(1.05);
+}
+
+.create-card {
+  background: #ffe600;
+  color: #222;
+}

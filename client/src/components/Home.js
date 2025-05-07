@@ -1,10 +1,15 @@
 import React, { useEffect, useState } from 'react';
 import './Home.css';
+import { Link } from 'react-router-dom'; 
 
 function Home() {
   const [teams, setTeams] = useState([]);
   const [showForm, setShowForm] = useState(false);
-  const [formData, setFormData] = useState({ team_name: '', city_name: '', state: '' });
+  const [formData, setFormData] = useState({
+    team_name: '',
+    city_name: '',
+    state: ''
+  });
 
   useEffect(() => {
     fetchTeams();
@@ -28,7 +33,7 @@ function Home() {
       .then(res => res.json())
       .then(() => {
         setShowForm(false);
-        setFormData({ name: '', city: '', state: '' });
+        setFormData({ team_name: '', city_name: '', state: '' });
         fetchTeams(); // Refresh team list
       })
       .catch(err => console.error('POST error:', err));
@@ -42,11 +47,11 @@ function Home() {
       </header>
 
       <div className="team-scroll">
-        {teams.map((team, index) => (
-          <div className="team-card" key={index}>
-            <h3>{team.name}</h3>
-            <p>{team.city}, {team.state}</p>
-          </div>
+        {teams.map((team) => (
+          <Link key={team.team_id} to={`/team/${team.team_id}`} className="team-card">
+            <h3>{team.team_name}</h3>
+            <p>{team.city_name}, {team.state}</p>
+          </Link>
         ))}
         <div className="team-card create-card" onClick={() => setShowForm(true)}>
           <h3>➕ Create Team</h3>
@@ -57,12 +62,29 @@ function Home() {
         <div className="modal">
           <form className="modal-content" onSubmit={handleSubmit}>
             <h2>Create New Team</h2>
-            <input type="text" placeholder="Team Name" value={formData.name} required
-              onChange={(e) => setFormData({ ...formData, name: e.target.value })} />
-            <input type="text" placeholder="City" value={formData.city} required
-              onChange={(e) => setFormData({ ...formData, city: e.target.value })} />
-            <input type="text" placeholder="State" value={formData.state} required
-              onChange={(e) => setFormData({ ...formData, state: e.target.value })} />
+
+            <input
+              type="text"
+              placeholder="Team Name"
+              value={formData.team_name}
+              required
+              onChange={(e) => setFormData({ ...formData, team_name: e.target.value })}
+            />
+            <input
+              type="text"
+              placeholder="City"
+              value={formData.city_name}
+              required
+              onChange={(e) => setFormData({ ...formData, city_name: e.target.value })}
+            />
+            <input
+              type="text"
+              placeholder="State"
+              value={formData.state}
+              required
+              onChange={(e) => setFormData({ ...formData, state: e.target.value })}
+            />
+
             <button type="submit">✅ Create</button>
             <button type="button" onClick={() => setShowForm(false)}>❌ Cancel</button>
           </form>

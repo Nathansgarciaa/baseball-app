@@ -1,0 +1,32 @@
+.addgame-container {
+    min-height: 100vh;
+    background: linear-gradient(to bottom right, #6a11cb, #2575fc);
+    color: white;
+    padding: 2rem;
+    text-align: center;
+  }
+  
+  .addgame-form {
+    max-width: 400px;
+    margin: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+  
+  .addgame-form input {
+    padding: 0.8rem;
+    font-size: 1rem;
+    border-radius: 10px;
+    border: none;
+  }
+  
+  .addgame-form button {
+    padding: 0.8rem;
+    font-size: 1rem;
+    border-radius: 10px;
+    border: none;
+    cursor: pointer;
+    font-weight: bold;
+  }
+  

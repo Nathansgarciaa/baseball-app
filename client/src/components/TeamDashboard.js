@@ -13,7 +13,9 @@ function TeamDashboard() {
       <p>Manage games and players here.</p>
 
       <div className="button-group">
-        <button onClick={() => alert(`Add game for team ${id}`)}>➕ Add Game</button>
+       <button onClick={() => navigate(`/team/${id}/add-game`)}>➕ Add Game</button>
+
+
         <button onClick={() => alert(`Add player for team ${id}`)}>👤 Add Player</button>
         <button onClick={() => alert(`Start live game for team ${id}`)}>⚾ Start Live Game</button>
       </div>

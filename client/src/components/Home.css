@@ -1,56 +1,53 @@
-body {
-  margin: 0;
-  font-family: 'Segoe UI', sans-serif;
-}
-
 .home-container {
-  background: linear-gradient(135deg, #6a11cb, #2575fc);
   min-height: 100vh;
-  padding: 40px 20px;
+  background: linear-gradient(to bottom right, #6a11cb, #2575fc);
   color: white;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  padding: 2rem;
   text-align: center;
 }
 
-.header .app-title {
-  font-size: 48px;
-  margin-bottom: 10px;
-  font-weight: bold;
-  letter-spacing: 1px;
-}
-
-.header .subheading {
-  font-size: 18px;
-  color: #ddd;
-  margin-bottom: 40px;
-}
-
-.team-scroll {
+/* Grid layout for teams */
+.team-grid {
   display: flex;
-  overflow-x: auto;
-  gap: 20px;
-  padding-bottom: 10px;
-  justify-content: flex-start;
-  padding-left: 10px;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 2rem;
+  margin-top: 3rem;
 }
 
-.team-card {
-  min-width: 200px;
-  background: white;
-  color: #333;
-  border-radius: 15px;
-  padding: 20px;
-  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
-  flex-shrink: 0;
+/* Team boxes styled like the dashboard buttons */
+.team-box {
+  background-color: white;
+  color: #6a11cb;
+  border-radius: 20px;
+  padding: 2rem;
+  width: 260px;
+  box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.15);
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+  font-size: 1.1rem;
+  font-weight: 600;
   text-align: center;
+}
+
+.team-box:hover {
+  transform: scale(1.03);
+  box-shadow: 0px 6px 16px rgba(0, 0, 0, 0.25);
+  background-color: #f8f5ff;
+}
+
+/* Optional button inside team boxes */
+.team-box button {
+  margin-top: 1rem;
+  padding: 0.6rem 1rem;
+  background: #6a11cb;
+  color: white;
+  border: none;
+  border-radius: 8px;
   cursor: pointer;
-  transition: transform 0.2s;
+  transition: background 0.3s ease;
 }
 
-.team-card:hover {
-  transform: scale(1.05);
-}
-
-.create-card {
-  background: #ffe600;
-  color: #222;
+.team-box button:hover {
+  background: #5311a8;
 }

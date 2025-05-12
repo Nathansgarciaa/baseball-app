@@ -3,9 +3,9 @@ import { useParams, useNavigate } from 'react-router-dom';
 import './AddGame.css';
 
 function AddGame() {
-  const { id } = useParams(); // this is YOUR team ID
+  const { id } = useParams(); // current user's team ID
   const navigate = useNavigate();
-  const [step, setStep] = useState(1); // step 1 = role selection, step 2 = form
+  const [step, setStep] = useState(1); // 1 = choose home/away, 2 = opponent info
   const [role, setRole] = useState(''); // 'home' or 'away'
 
   const [formData, setFormData] = useState({
@@ -19,14 +19,14 @@ function AddGame() {
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    fetch(`http://localhost:3000/teams/${id}/games`, {
+    fetch(`http://localhost:3001/teams/${id}/games`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ ...formData, role })
+      body: JSON.stringify({ ...formData, role }) // role only affects backend logic
     })
       .then(res => res.json())
       .then(() => {
-        alert('Game created!');
+        alert('✅ Game created!');
         navigate(`/team/${id}`);
       })
       .catch(() => {
@@ -34,21 +34,25 @@ function AddGame() {
       });
   };
 
+  // Step 1: Choose home or away
   if (step === 1) {
     return (
       <div className="addgame-container">
         <h2>🏟 Are you the home or away team?</h2>
         <div className="button-group">
-          <button onClick={() => { setRole('home'); setStep(2); }}>Home</button>
-          <button onClick={() => { setRole('away'); setStep(2); }}>Away</button>
+          <button onClick={() => { setRole(1); setStep(2); }}>Home</button>
+          <button onClick={() => { setRole(2); setStep(2); }}>Away</button>
         </div>
+
       </div>
     );
   }
 
+  // Step 2: Opponent + game details
   return (
     <div className="addgame-container">
-      <h2>Add Game ({role.toUpperCase()} team)</h2>
+      <h2>Add Game ({role === 1 ? 'HOME' : 'AWAY'} team)</h2> 
+
       <form onSubmit={handleSubmit} className="addgame-form">
         <input
           type="date"
@@ -63,6 +67,7 @@ function AddGame() {
           value={formData.location}
           onChange={(e) => setFormData({ ...formData, location: e.target.value })}
         />
+
         <h3>Opponent Info</h3>
         <input
           type="text"
@@ -74,12 +79,14 @@ function AddGame() {
         <input
           type="text"
           placeholder="City"
+          required
           value={formData.opponent_city}
           onChange={(e) => setFormData({ ...formData, opponent_city: e.target.value })}
         />
         <input
           type="text"
           placeholder="State"
+          required
           value={formData.opponent_state}
           onChange={(e) => setFormData({ ...formData, opponent_state: e.target.value })}
         />

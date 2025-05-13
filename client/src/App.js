@@ -4,6 +4,11 @@ import Home from './components/home';
 import TeamDashboard from './components/TeamDashboard';
 import AddGame from './components/AddGame';
 import Login from './components/login';
+import ViewGames from './components/ViewGames';
+import GameCast from './components/GameCast';
+
+
+
 
 function App() {
   return (
@@ -14,6 +19,9 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/team/:id" element={<TeamDashboard />} />
         <Route path="/team/:id/add-game" element={<AddGame />} />
+        <Route path="/team/:id/games" element={<ViewGames />} />
+        <Route path="/game/:id" element={<GameCast />} />
+
         <Route path="/home" element={<Home />} />
       </Routes>
     </Router>

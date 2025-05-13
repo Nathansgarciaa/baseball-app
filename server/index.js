@@ -1,21 +1,24 @@
 const express = require('express');
 const cors = require('cors');
-const db = require('./db');
 const bcrypt = require('bcrypt');
 const {
-  addTeam,
-  addOpponentTeam,
-  findTeam,
-  addGame,
   createUser,
   findUserByUsername,
   getAllTeams,
-  getGamesByTeamId
+  addTeam,
+  findTeam,
+  addOpponentTeam,
+  addGame,
+  getGamesByTeamId,
+  addPlayerToTeam,
+  getPlayersByTeamId
 } = require('./dbFunctions');
 
 const app = express();
 app.use(cors());
 app.use(express.json());
+
+// --- AUTH ROUTES ---
 
 // Signup
 app.post('/signup', async (req, res) => {
@@ -26,7 +29,7 @@ app.post('/signup', async (req, res) => {
       if (err) return res.status(500).json({ message: 'Error creating user' });
       res.status(201).json({ message: 'User created' });
     });
-  } catch (err) {
+  } catch {
     res.status(500).json({ message: 'Password encryption failed' });
   }
 });
@@ -45,6 +48,8 @@ app.post('/login', (req, res) => {
   });
 });
 
+// --- TEAM ROUTES ---
+
 // Get all teams
 app.get('/teams', (req, res) => {
   getAllTeams((err, results) => {
@@ -53,7 +58,7 @@ app.get('/teams', (req, res) => {
   });
 });
 
-// Add a new team (user-coached)
+// Create new team
 app.post('/teams', (req, res) => {
   const { team_name, city_name, state, coach_user_id } = req.body;
   if (!coach_user_id) return res.status(400).json({ error: 'Missing coach_user_id' });
@@ -64,7 +69,9 @@ app.post('/teams', (req, res) => {
   });
 });
 
-// Add a game
+// --- GAME ROUTES ---
+
+// Add a new game
 app.post('/teams/:id/games', (req, res) => {
   const userTeamId = parseInt(req.params.id);
   const {
@@ -84,15 +91,9 @@ app.post('/teams/:id/games', (req, res) => {
     if (err) return res.status(500).json({ error: 'Failed to check opponent' });
 
     const proceed = (opponentId) => {
-      let home_team_id, away_team_id;
+      const home_team_id = role === 1 ? userTeamId : opponentId;
+      const away_team_id = role === 1 ? opponentId : userTeamId;
 
-      if (role === 1) {
-        home_team_id = userTeamId;
-        away_team_id = opponentId;
-      } else if (role === 2) {
-        home_team_id = opponentId;
-        away_team_id = userTeamId;
-      }
       addGame(game_date, home_team_id, away_team_id, location, (err, result) => {
         if (err) return res.status(500).json({ error: 'Failed to insert game' });
         res.status(201).json({ message: 'Game created', game_id: result.insertId });
@@ -109,47 +110,40 @@ app.post('/teams/:id/games', (req, res) => {
     }
   });
 });
+
+// Get games by team
 app.get('/team/:id/games', (req, res) => {
   const teamId = parseInt(req.params.id);
-
   getGamesByTeamId(teamId, (err, results) => {
-    if (err) {
-      console.error('❌ Failed to get games:', err);
-      return res.status(500).json({ error: 'Failed to fetch games' });
-    }
+    if (err) return res.status(500).json({ error: 'Failed to fetch games' });
     res.json(results);
   });
 });
-// POST add player
+
+// --- PLAYER ROUTES ---
+
+// Add player to team
 app.post('/teams/:id/players', (req, res) => {
   const team_id = parseInt(req.params.id);
   const { first_name, last_name, position, age } = req.body;
 
-  db.query(
-    'INSERT INTO player (first_name, last_name, position, age, is_active, team_id) VALUES (?, ?, ?, ?, ?, ?)',
-    [first_name, last_name, position, age, 1, team_id],
-    (err, result) => {
-      if (err) {
-        console.error(err); // helpful for debugging
-        return res.status(500).json({ error: 'Insert player failed' });
-      }
-      res.status(201).json({ message: 'Player added', player_id: result.insertId });
-    }
-  );
+  addPlayerToTeam(team_id, first_name, last_name, position, age, (err, result) => {
+    if (err) return res.status(500).json({ error: 'Insert player failed' });
+    res.status(201).json({ message: 'Player added', player_id: result.insertId });
+  });
 });
 
-//GET add player
+// Get players on team
 app.get('/teams/:id/players', (req, res) => {
   const team_id = parseInt(req.params.id);
-  db.query('SELECT * FROM player WHERE team_id = ?', [team_id], (err, results) => {
+  getPlayersByTeamId(team_id, (err, results) => {
     if (err) return res.status(500).json({ error: 'Fetch players failed' });
     res.json(results);
   });
 });
 
-
-
+// --- START SERVER ---
 const PORT = 3001;
 app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
+  console.log(`✅ Server is running on port ${PORT}`);
 });

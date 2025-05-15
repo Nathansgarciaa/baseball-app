@@ -43,4 +43,51 @@
     background-color: #f0f0f0;
     transform: scale(1.03);
   }
-  
+  /* 🧊 Pretty, clean, wide & modern table */
+.roster-table {
+  width: 100%;
+  max-width: 1200px;
+  margin: 2rem auto;
+  border-collapse: separate;
+  border-spacing: 0;
+  border-radius: 16px;
+  overflow: hidden;
+  background-color: white;
+  color: #333;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+  font-size: 1rem;
+}
+
+/* Header styles */
+.roster-table th {
+  background-color: #f8f9fb;
+  font-weight: 600;
+  padding: 16px;
+  border-bottom: 2px solid #ddd;
+  text-align: center;
+}
+
+/* Cell styles */
+.roster-table td {
+  padding: 14px 16px;
+  text-align: center;
+  border-bottom: 1px solid #eee;
+}
+
+/* Clickable row */
+.roster-table tr.clickable-row {
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.roster-table tr.clickable-row:hover {
+  background-color: #f0f4ff;
+}
+
+/* First and last cell rounded if needed */
+.roster-table tr:first-child th:first-child {
+  border-top-left-radius: 16px;
+}
+.roster-table tr:first-child th:last-child {
+  border-top-right-radius: 16px;
+}

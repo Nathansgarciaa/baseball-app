@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import './Home.css';
-import { Link } from 'react-router-dom'; 
+import { Link } from 'react-router-dom';
 
 function Home() {
   const [teams, setTeams] = useState([]);
@@ -16,7 +16,7 @@ function Home() {
   }, []);
 
   const fetchTeams = () => {
-    fetch('http://localhost:3001/teams')
+    fetch('http://localhost:3001/team')
       .then(res => res.json())
       .then(data => setTeams(data))
       .catch(err => console.error('Fetch error:', err));
@@ -25,7 +25,7 @@ function Home() {
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    fetch('http://localhost:3001/teams', {
+    fetch('http://localhost:3001/team', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(formData)
@@ -62,7 +62,6 @@ function Home() {
         <div className="modal">
           <form className="modal-content" onSubmit={handleSubmit}>
             <h2>Create New Team</h2>
-
             <input
               type="text"
               placeholder="Team Name"
@@ -84,7 +83,6 @@ function Home() {
               required
               onChange={(e) => setFormData({ ...formData, state: e.target.value })}
             />
-
             <button type="submit">✅ Create</button>
             <button type="button" onClick={() => setShowForm(false)}>❌ Cancel</button>
           </form>

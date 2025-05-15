@@ -19,15 +19,15 @@ function AddGame() {
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    fetch(`http://localhost:3001/teams/${id}/games`, {
+    fetch(`http://localhost:3001/games/team/${id}/games`, {  // ✅ fixed route
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ ...formData, role }) // role only affects backend logic
     })
       .then(res => res.json())
-      .then(() => {
+      .then((data) => {
         alert('✅ Game created!');
-        navigate(`/team/${id}`);
+        navigate(`/game/${data.game_id}`);
       })
       .catch(() => {
         alert('❌ Failed to add game');
@@ -43,7 +43,6 @@ function AddGame() {
           <button onClick={() => { setRole(1); setStep(2); }}>Home</button>
           <button onClick={() => { setRole(2); setStep(2); }}>Away</button>
         </div>
-
       </div>
     );
   }
@@ -51,7 +50,7 @@ function AddGame() {
   // Step 2: Opponent + game details
   return (
     <div className="addgame-container">
-      <h2>Add Game ({role === 1 ? 'HOME' : 'AWAY'} team)</h2> 
+      <h2>Add Game ({role === 1 ? 'HOME' : 'AWAY'} team)</h2>
 
       <form onSubmit={handleSubmit} className="addgame-form">
         <input

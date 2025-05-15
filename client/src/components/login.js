@@ -13,7 +13,7 @@ function Login() {
     const endpoint = isSignup ? 'signup' : 'login';
 
     try {
-      const res = await axios.post(`http://localhost:3001/${endpoint}`, form);
+      const res = await axios.post(`http://localhost:3001/auth/${endpoint}`, form); // ✅ fixed
       alert(res.data.message);
       if (!isSignup) navigate('/home'); // Redirect after login
     } catch (err) {

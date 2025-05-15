@@ -1,4 +1,3 @@
-// GameCast.js
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import './TeamDashboard.css';
@@ -11,8 +10,8 @@ function GameCast() {
   const [log, setLog] = useState([]);
 
   useEffect(() => {
-    // Fetch all players for now (home + away support can be refined)
-    fetch(`http://localhost:3001/game/${id}/players`)
+    // Fixed endpoint
+    fetch(`http://localhost:3001/games/${id}/players`)
       .then(res => res.json())
       .then(data => setPlayers(data))
       .catch(err => console.error('Failed to load players:', err));

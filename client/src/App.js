@@ -9,6 +9,9 @@ import GameCast from './components/GameCast';
 
 
 
+import RosterScreen from './components/RosterScreen'; // adjust path if needed
+
+
 
 function App() {
   return (
@@ -21,6 +24,7 @@ function App() {
         <Route path="/team/:id/add-game" element={<AddGame />} />
         <Route path="/team/:id/games" element={<ViewGames />} />
         <Route path="/game/:id" element={<GameCast />} />
+        <Route path="/team/:id/roster" element={<RosterScreen />} />
 
         <Route path="/home" element={<Home />} />
       </Routes>

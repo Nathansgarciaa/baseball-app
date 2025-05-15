@@ -1,4 +1,3 @@
-// ViewGames.js
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import './TeamDashboard.css';
@@ -9,10 +8,13 @@ function ViewGames() {
   const [games, setGames] = useState([]);
 
   useEffect(() => {
-    fetch(`http://localhost:3001/team/${id}/games`)
-      .then(res => res.json())
-      .then(data => setGames(data))
-      .catch(err => console.error('Failed to fetch games:', err));
+    fetch(`http://localhost:3001/games/team/${id}/games`)
+      .then((res) => res.json())
+      .then((data) => setGames(data))
+      .catch((err) => {
+        console.error('❌ Failed to fetch games:', err);
+        alert('❌ Could not load games');
+      });
   }, [id]);
 
   return (
@@ -30,17 +32,14 @@ function ViewGames() {
             <div
               key={game.game_id}
               className="team-card"
-              onClick={() => navigate(`/game/${game.game_id}`)}
               style={{
-                cursor: 'pointer',
                 backgroundColor: 'white',
                 color: '#333',
                 padding: '1.5rem',
                 borderRadius: '16px',
                 boxShadow: '0 4px 12px rgba(0, 0, 0, 0.2)',
-                marginBottom: '1rem',
-                maxWidth: '500px',
-                margin: '1rem auto'
+                margin: '1rem auto',
+                maxWidth: '500px'
               }}
             >
               <h3>{new Date(game.game_date).toLocaleDateString()} @ {game.location}</h3>

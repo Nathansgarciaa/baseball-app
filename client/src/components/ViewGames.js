@@ -39,8 +39,10 @@ function ViewGames() {
                 borderRadius: '16px',
                 boxShadow: '0 4px 12px rgba(0, 0, 0, 0.2)',
                 margin: '1rem auto',
-                maxWidth: '500px'
+                maxWidth: '500px',
+                cursor: 'pointer' // <-- make it feel clickable
               }}
+              onClick={() => navigate(`/game/${game.game_id}`)} // <-- redirect to game page
             >
               <h3>{new Date(game.game_date).toLocaleDateString()} @ {game.location}</h3>
               <p><strong>Home:</strong> {game.home_team_name} vs <strong>Away:</strong> {game.away_team_name}</p>

@@ -1,17 +1,21 @@
-const gameService = require('../services/gameService');
-const teamService = require('../services/teamService');
+const gameService = require('../services/gameService'); // Handles DB logic for games
+const teamService = require('../services/teamService'); // Handles DB logic for teams
 
+// Adds a new game between the current team and an opponent
 exports.addGame = (req, res) => {
-  const userTeamId = parseInt(req.params.id);
+  const userTeamId = parseInt(req.params.id); // ID of the current user's team
   const { game_date, location, opponent_name, opponent_city, opponent_state, role } = req.body;
 
+  // Role must be 1 (home) or 2 (away)
   if (![1, 2].includes(role)) {
     return res.status(400).json({ error: 'Invalid team role (1 = home, 2 = away)' });
   }
 
+  // Check if the opponent team already exists
   teamService.findTeam(opponent_name, opponent_city, opponent_state, (err, rows) => {
     if (err) return res.status(500).json({ error: 'Failed to check opponent' });
 
+    // Reusable function to insert the game after getting opponent team ID
     const proceed = (opponentId) => {
       const home_team_id = role === 1 ? userTeamId : opponentId;
       const away_team_id = role === 1 ? opponentId : userTeamId;
@@ -22,9 +26,11 @@ exports.addGame = (req, res) => {
       });
     };
 
+    // If the team already exists, use it
     if (rows.length > 0) {
       proceed(rows[0].team_id);
     } else {
+      // Otherwise, create the opponent team first
       teamService.addOpponentTeam(opponent_name, opponent_city, opponent_state, (err, result) => {
         if (err) return res.status(500).json({ error: 'Failed to insert opponent team' });
         proceed(result.insertId);
@@ -33,6 +39,7 @@ exports.addGame = (req, res) => {
   });
 };
 
+// Get all games that involve a specific team
 exports.getGamesByTeam = (req, res) => {
   const teamId = parseInt(req.params.id);
   gameService.getGamesByTeamId(teamId, (err, results) => {
@@ -40,6 +47,8 @@ exports.getGamesByTeam = (req, res) => {
     res.json(results);
   });
 };
+
+// Get players who participated in a specific game (raw query version)
 exports.getPlayersByGameId = (req, res) => {
   const gameId = req.params.id;
   const query = `
@@ -58,7 +67,7 @@ exports.getPlayersByGameId = (req, res) => {
   });
 };
 
-
+// Get players for a game using a service abstraction (cleaner)
 exports.getPlayersForGame = async (req, res) => {
   try {
     const gameId = req.params.id;
@@ -70,7 +79,7 @@ exports.getPlayersForGame = async (req, res) => {
   }
 };
 
-
+// Update a specific stat (like "hits", "home_runs", etc.) for a player in a game
 exports.updatePlayerStat = async (req, res) => {
   try {
     const { game_id, player_id, stat_type } = req.body;
@@ -81,6 +90,8 @@ exports.updatePlayerStat = async (req, res) => {
     res.status(500).json({ error: 'Failed to update stat' });
   }
 };
+
+// Get all player stats for a given game
 exports.getGameStats = (req, res) => {
   const gameId = parseInt(req.params.id);
   console.log("📊 Fetching stats for game ID:", gameId);

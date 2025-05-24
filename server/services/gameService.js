@@ -1,10 +1,19 @@
-
+// Import the configured database connection
 const db = require('../db');
 
+// 📌 Add a new game to the database
+// Inputs: game date, home team ID, away team ID, location
+// Sets score as NULL and is_final as false (0) by default
 exports.addGame = (game_date, home_team_id, away_team_id, location, cb) => {
-  db.query('INSERT INTO game (game_date, home_team_id, away_team_id, location, is_final, score) VALUES (?, ?, ?, ?, 0, NULL)', [game_date, home_team_id, away_team_id, location], cb);
+  db.query(
+    'INSERT INTO game (game_date, home_team_id, away_team_id, location, is_final, score) VALUES (?, ?, ?, ?, 0, NULL)',
+    [game_date, home_team_id, away_team_id, location],
+    cb
+  );
 };
 
+// 📌 Get all games for a specific team (as home or away)
+// Includes subqueries to fetch the team names for each game
 exports.getGamesByTeamId = (teamId, cb) => {
   db.query(`
     SELECT 
@@ -22,8 +31,8 @@ exports.getGamesByTeamId = (teamId, cb) => {
   `, [teamId, teamId], cb);
 };
 
-
-
+// 📌 Fetch all players involved in a specific game
+// Players are joined via their team's participation in the game
 exports.fetchPlayersForGame = (gameId) => {
   return new Promise((resolve, reject) => {
     const query = `
@@ -37,14 +46,15 @@ exports.fetchPlayersForGame = (gameId) => {
     db.query(query, [gameId], (err, results) => {
       if (err) {
         console.error('❌ DB error in service:', err);
-        reject(err);
-      } else {
-        resolve(results);
+        return reject(err);
       }
+      resolve(results);
     });
   });
 };
 
+// 📌 Increment a specific stat (like 'hits' or 'walks') for a player in a game
+// Uses ON DUPLICATE KEY to insert if not present, otherwise increments
 exports.incrementPlayerStat = (game_id, player_id, stat_type) => {
   return new Promise((resolve, reject) => {
     const validStats = [
@@ -53,16 +63,16 @@ exports.incrementPlayerStat = (game_id, player_id, stat_type) => {
       'runs', 'pitches_thrown'
     ];
 
+    // Ensure the stat type is allowed
     if (!validStats.includes(stat_type)) {
       return reject(new Error('Invalid stat type'));
     }
 
     const query = `
-  INSERT INTO player_stats (game_id, player_id, ${stat_type})
-  VALUES (?, ?, 1)
-  ON DUPLICATE KEY UPDATE ${stat_type} = ${stat_type} + 1
-`;
-
+      INSERT INTO player_stats (game_id, player_id, ${stat_type})
+      VALUES (?, ?, 1)
+      ON DUPLICATE KEY UPDATE ${stat_type} = ${stat_type} + 1
+    `;
 
     db.query(query, [game_id, player_id], (err, result) => {
       if (err) {
@@ -73,7 +83,10 @@ exports.incrementPlayerStat = (game_id, player_id, stat_type) => {
     });
   });
 };
-;exports.fetchStatsByGameId = (gameId, cb) => {
+
+// 📌 Fetch all player stats for a given game
+// Joins player info with their stats
+exports.fetchStatsByGameId = (gameId, cb) => {
   const query = `
     SELECT
       p.first_name,
@@ -83,5 +96,6 @@ exports.incrementPlayerStat = (game_id, player_id, stat_type) => {
     JOIN player p ON ps.player_id = p.player_id
     WHERE ps.game_id = ?
   `;
+
   db.query(query, [gameId], cb);
 };

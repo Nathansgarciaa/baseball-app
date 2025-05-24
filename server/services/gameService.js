@@ -22,3 +22,66 @@ exports.getGamesByTeamId = (teamId, cb) => {
     ORDER BY g.game_date DESC
   `, [teamId, teamId], cb);
 };
+
+
+exports.fetchPlayersForGame = (gameId) => {
+  return new Promise((resolve, reject) => {
+    const query = `
+      SELECT p.player_id, p.first_name, p.last_name, p.position, p.team_id
+      FROM player p
+      JOIN team t ON p.team_id = t.team_id
+      JOIN game g ON g.home_team_id = t.team_id OR g.away_team_id = t.team_id
+      WHERE g.game_id = ?
+    `;
+
+    db.query(query, [gameId], (err, results) => {
+      if (err) {
+        console.error('❌ DB error in service:', err);
+        reject(err);
+      } else {
+        resolve(results);
+      }
+    });
+  });
+};
+
+exports.incrementPlayerStat = (game_id, player_id, stat_type) => {
+  return new Promise((resolve, reject) => {
+    const validStats = [
+      'at_bats', 'hits', 'home_runs', 'rbis',
+      'strikeouts', 'walks', 'innings_pitched',
+      'runs', 'pitches_thrown'
+    ];
+
+    if (!validStats.includes(stat_type)) {
+      return reject(new Error('Invalid stat type'));
+    }
+
+    const query = `
+  INSERT INTO player_stats (game_id, player_id, ${stat_type})
+  VALUES (?, ?, 1)
+  ON DUPLICATE KEY UPDATE ${stat_type} = ${stat_type} + 1
+`;
+
+
+    db.query(query, [game_id, player_id], (err, result) => {
+      if (err) {
+        console.error('❌ DB error:', err);
+        return reject(err);
+      }
+      resolve(result);
+    });
+  });
+};
+;exports.fetchStatsByGameId = (gameId, cb) => {
+  const query = `
+    SELECT
+      p.first_name,
+      p.last_name,
+      ps.*
+    FROM player_stats ps
+    JOIN player p ON ps.player_id = p.player_id
+    WHERE ps.game_id = ?
+  `;
+  db.query(query, [gameId], cb);
+};

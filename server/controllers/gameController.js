@@ -40,3 +40,56 @@ exports.getGamesByTeam = (req, res) => {
     res.json(results);
   });
 };
+exports.getPlayersByGameId = (req, res) => {
+  const gameId = req.params.id;
+  const query = `
+    SELECT p.player_id, p.first_name, p.last_name, p.position
+    FROM player p
+    JOIN team t ON p.team_id = t.team_id
+    JOIN game g ON (g.home_team_id = t.team_id OR g.away_team_id = t.team_id)
+    WHERE g.game_id = ?
+  `;
+  db.query(query, [gameId], (err, results) => {
+    if (err) {
+      console.error("❌ Error fetching players:", err);
+      return res.status(500).json({ error: 'Internal server error' });
+    }
+    res.json(results);
+  });
+};
+
+
+exports.getPlayersForGame = async (req, res) => {
+  try {
+    const gameId = req.params.id;
+    const players = await gameService.fetchPlayersForGame(gameId);
+    res.json(players);
+  } catch (err) {
+    console.error('❌ Error in controller:', err);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};
+
+
+exports.updatePlayerStat = async (req, res) => {
+  try {
+    const { game_id, player_id, stat_type } = req.body;
+    await gameService.incrementPlayerStat(game_id, player_id, stat_type);
+    res.json({ message: 'Stat updated' });
+  } catch (err) {
+    console.error('❌ Error updating stat:', err);
+    res.status(500).json({ error: 'Failed to update stat' });
+  }
+};
+exports.getGameStats = (req, res) => {
+  const gameId = parseInt(req.params.id);
+  console.log("📊 Fetching stats for game ID:", gameId);
+
+  gameService.fetchStatsByGameId(gameId, (err, data) => {
+    if (err) {
+      console.error("❌ Error fetching stats:", err);
+      return res.status(500).json({ error: 'Failed to get stats' });
+    }
+    res.json(data);
+  });
+};

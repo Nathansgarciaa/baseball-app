@@ -16,17 +16,6 @@ exports.createTeam = (req, res) => {
     res.status(201).json({ message: 'Team created', team_id: result.insertId });
   });
 };
-
-exports.getPlayersWithStats = async (req, res) => {
-  const teamId = parseInt(req.params.id);
-  try {
-    const players = await teamService.fetchPlayersWithStats(teamId);
-    res.json(players);
-  } catch (err) {
-    console.error('Failed to fetch roster with stats:', err);
-    res.status(500).json({ error: 'Failed to fetch roster with stats' });
-  }
-};
 exports.getTeamsByCoach = (req, res) => {
   const coachUserId = parseInt(req.params.id);
 
@@ -37,4 +26,14 @@ exports.getTeamsByCoach = (req, res) => {
     }
     res.json(teams);
   });
+};
+exports.getPlayersWithStats = async (req, res) => {
+  const teamId = parseInt(req.params.id);
+  try {
+    const players = await teamService.fetchPlayersWithStats(teamId);
+    res.json(players);
+  } catch (err) {
+    console.error('Failed to fetch roster with stats:', err);
+    res.status(500).json({ error: 'Failed to fetch roster with stats' });
+  }
 };

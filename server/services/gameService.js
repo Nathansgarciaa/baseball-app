@@ -1,3 +1,4 @@
+
 const db = require('../db');
 
 exports.addGame = (game_date, home_team_id, away_team_id, location, cb) => {
@@ -13,15 +14,14 @@ exports.getGamesByTeamId = (teamId, cb) => {
       g.score,
       g.home_team_id,
       g.away_team_id,
-      home.team_name AS home_team_name,
-      away.team_name AS away_team_name
+      (SELECT team_name FROM team WHERE team_id = g.home_team_id) AS home_team_name,
+      (SELECT team_name FROM team WHERE team_id = g.away_team_id) AS away_team_name
     FROM game g
-    JOIN team home ON g.home_team_id = home.team_id
-    JOIN team away ON g.away_team_id = away.team_id
     WHERE g.home_team_id = ? OR g.away_team_id = ?
     ORDER BY g.game_date DESC
   `, [teamId, teamId], cb);
 };
+
 
 
 exports.fetchPlayersForGame = (gameId) => {

@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import Papa from 'papaparse';
 import './TeamDashboard.css'; // reuse existing styles
 
 function GameStats() {
@@ -11,7 +12,7 @@ function GameStats() {
     fetch(`http://localhost:3001/games/${id}/stats`)
       .then((res) => res.json())
       .then((data) => {
-        console.log("📊 Fetched stats:", data);  // Debug line
+        console.log("📊 Fetched stats:", data);
         setStats(data);
       })
       .catch((err) => {
@@ -20,6 +21,23 @@ function GameStats() {
       });
   }, [id]);
 
+  const handleDownloadCSV = () => {
+    if (!stats || stats.length === 0) {
+      alert('❌ No data to export.');
+      return;
+    }
+
+    const csv = Papa.unparse(stats);
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', `game_${id}_stats.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   if (stats === null) return <p>Loading stats...</p>;
   if (stats.length === 0) return <p>No stats found for this game.</p>;
 
@@ -27,6 +45,7 @@ function GameStats() {
     <div className="dashboard-container">
       <h2>📊 Game #{id} Stats</h2>
       <button onClick={() => navigate(-1)} style={{ marginBottom: '1rem' }}>🔙 Back</button>
+      <button onClick={handleDownloadCSV} style={{ marginBottom: '1rem', marginLeft: '1rem' }}>⬇️ Download CSV</button>
 
       <div style={{ overflowX: 'auto' }}>
         <table className="roster-table">

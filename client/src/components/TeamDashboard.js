@@ -46,7 +46,7 @@ function TeamDashboard() {
         <button onClick={() => navigate(`/team/${id}/roster`)}>📋 View Roster</button>
       </div>
 
-      <button onClick={() => navigate('/')}>🔙 Back to Teams</button>
+      <button onClick={() => navigate('/home')}>🔙 Back to Teams</button>
 
       {showPlayerForm && (
         <div className="modal">

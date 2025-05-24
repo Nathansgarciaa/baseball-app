@@ -1,7 +1,13 @@
+// authService.js
 const db = require('../db');
 
 exports.createUser = (username, hash, cb) => {
-  db.query('INSERT INTO user (username, password) VALUES (?, ?)', [username, hash], cb);
+  const query = `
+    START TRANSACTION;
+    INSERT INTO user (username, password) VALUES (?, ?);
+    COMMIT;
+  `;
+  db.query(query, [username, hash], cb);
 };
 
 exports.findUserByUsername = (username, cb) => {

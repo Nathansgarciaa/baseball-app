@@ -1,7 +1,13 @@
 const db = require('../db');
 
 exports.addTeam = (team_name, city_name, state, coach_user_id, cb) => {
-  db.query('INSERT INTO team (team_name, city_name, state, coach_user_id) VALUES (?, ?, ?, ?)', [team_name, city_name, state, coach_user_id], cb);
+  const query = `
+    START TRANSACTION;
+    INSERT INTO team (team_name, city_name, state, coach_user_id)
+    VALUES (?, ?, ?, ?);
+    COMMIT;
+  `;
+  db.query(query, [team_name, city_name, state, coach_user_id], cb);
 };
 
 exports.getAllTeams = (cb) => {
@@ -13,13 +19,22 @@ exports.findTeam = (team_name, city_name, state, cb) => {
 };
 
 exports.addOpponentTeam = (team_name, city_name, state, cb) => {
-  db.query('INSERT INTO team (team_name, city_name, state, coach_user_id) VALUES (?, ?, ?, NULL)', [team_name, city_name, state], cb);
+  const query = `
+    START TRANSACTION;
+    INSERT INTO team (team_name, city_name, state, coach_user_id)
+    VALUES (?, ?, ?, NULL);
+    COMMIT;
+  `;
+  db.query(query, [team_name, city_name, state], cb);
 };
 
 exports.fetchPlayersWithStats = (teamId) => {
   return new Promise((resolve, reject) => {
-    const query = `
+    const viewQuery = `
+      CREATE OR REPLACE VIEW PlayerStatsView AS
       SELECT
+        p.player_id,
+        p.team_id,
         p.first_name,
         p.last_name,
         p.position,
@@ -35,16 +50,19 @@ exports.fetchPlayersWithStats = (teamId) => {
         COALESCE(SUM(ps.pitches_thrown), 0) AS pitches_thrown
       FROM player p
       LEFT JOIN player_stats ps ON p.player_id = ps.player_id
-      WHERE p.team_id = ? AND p.is_active = 1
-      GROUP BY p.first_name, p.last_name, p.position, p.age
+      WHERE p.is_active = 1
+      GROUP BY p.player_id, p.team_id, p.first_name, p.last_name, p.position, p.age
     `;
-
-    db.query(query, [teamId], (err, results) => {
-      if (err) return reject(err);
-      resolve(results);
+    db.query(viewQuery, () => {
+      const fetchQuery = `SELECT * FROM PlayerStatsView WHERE team_id = ?`;
+      db.query(fetchQuery, [teamId], (err, results) => {
+        if (err) reject(err);
+        else resolve(results);
+      });
     });
   });
 };
+
 exports.getTeamsByCoach = (coachUserId, cb) => {
   const query = `SELECT * FROM team WHERE coach_user_id = ?`;
   db.query(query, [coachUserId], cb);

@@ -1,14 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
-import './TeamDashboard.css'; // Reuse shared styles
+import { useParams, useNavigate } from 'react-router-dom'; // ✅ Added useNavigate
+import './TeamDashboard.css'; // Reuse styling
 
 function GameCast() {
   const { id } = useParams(); // game ID
+  const navigate = useNavigate();
   const [showTracker, setShowTracker] = useState(false);
-  const [selectedEvent, setSelectedEvent] = useState(null);
+  const [selectedStat, setSelectedStat] = useState(null);
+  const [selectedPlayer, setSelectedPlayer] = useState(null);
   const [players, setPlayers] = useState([]);
   const [log, setLog] = useState([]);
-  const [selectedPitcher, setSelectedPitcher] = useState(null);
   const [inning, setInning] = useState(1);
   const [half, setHalf] = useState('top');
 
@@ -23,59 +24,73 @@ function GameCast() {
       .catch((err) => console.error('❌ Failed to load players:', err));
   }, [id]);
 
-  const handlePlayerClick = (player) => {
-    if (!selectedEvent) return alert('❗ Select an event first!');
-    if (!selectedPitcher) return alert('❗ Select a pitcher first!');
+  const statOptions = [
+    'at_bats', 'hits', 'home_runs', 'rbis',
+    'strikeouts', 'walks', 'innings_pitched',
+    'runs', 'pitches_thrown'
+  ];
 
-    const entry = `${player.first_name} ${player.last_name} → ${selectedEvent} (Pitcher: ${selectedPitcher.first_name} ${selectedPitcher.last_name}, Inning: ${inning} ${half})`;
+  const handleAddStat = () => {
+    if (!selectedStat || !selectedPlayer) {
+      alert("Please select a stat and a player.");
+      return;
+    }
+
+    const entry = `${selectedPlayer.first_name} ${selectedPlayer.last_name} ➕ ${selectedStat.replace(/_/g, ' ')} (Inning ${inning} ${half})`;
     setLog([entry, ...log]);
-    setSelectedEvent(null);
+    setSelectedStat(null);
+    setSelectedPlayer(null);
 
-    fetch(`http://localhost:3001/games/${id}/event`, {
+    fetch(`http://localhost:3001/games/${id}/stat`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         game_id: parseInt(id),
-        inning,
-        half,
-        batter_id: player.player_id,
-        pitcher_id: selectedPitcher.player_id,
-        event_type: selectedEvent
+        player_id: selectedPlayer.player_id,
+        stat_type: selectedStat
       })
     })
-      .then((res) => res.json())
-      .then(() => console.log('✅ Event logged'))
-      .catch((err) => console.error('❌ Failed to log event:', err));
+      .then(res => res.json())
+      .then(() => console.log('✅ Stat updated'))
+      .catch(err => console.error('❌ Failed to update stat:', err));
   };
-
-  const events = [
-    'Single', 'Double', 'Triple', 'Home Run',
-    'Walk', 'Strikeout', 'Out', 'Steal',
-    'Ball', 'Strike (Looking)', 'Strike (Swinging)', 'Foul'
-  ];
-
-  // TEMP: Show all players until position data is fixed
-  const pitchers = players;
-  const batters = players;
 
   return (
     <div className="dashboard-container">
       <h2>⚾ Live GameCast – Game #{id}</h2>
-      <button onClick={() => setShowTracker(true)}>📡 Start Live Tracking</button>
+
+      <div className="button-group" style={{ marginBottom: '1rem' }}>
+        <button onClick={() => setShowTracker(true)}>📡 Start Live Tracking</button>
+        <button
+          onClick={() => navigate(`/game/${id}/stats`)}
+          style={{
+            marginLeft: '1rem',
+            backgroundColor: '#007bff',
+            color: 'white',
+            padding: '0.6rem 1.2rem',
+            fontWeight: 'bold',
+            borderRadius: '8px',
+            border: 'none',
+            cursor: 'pointer'
+          }}
+        >
+          📊 Game Stats
+        </button>
+      </div>
 
       {showTracker && (
         <div className="modal">
           <div className="modal-content">
 
-            <h3>1️⃣ Select Event</h3>
+            <h3>1️⃣ Select Stat</h3>
             <div className="button-group">
-              {events.map((e) => (
+              {statOptions.map((stat) => (
                 <button
-                  key={e}
-                  onClick={() => setSelectedEvent(e)}
-                  className={selectedEvent === e ? 'selected' : ''}
+                  key={stat}
+                  onClick={() => setSelectedStat(stat)}
+                  className={selectedStat === stat ? 'selected' : ''}
                 >
-                  {e}
+                  +1 {stat.replace(/_/g, ' ')}
                 </button>
               ))}
             </div>
@@ -93,34 +108,60 @@ function GameCast() {
               </select>
             </div>
 
-            <h3>3️⃣ Select Pitcher</h3>
+            <h3>3️⃣ Select Player</h3>
             <div className="button-group scrollable-group">
-              {pitchers.map((p) => (
-                <button
-                  key={`pitcher-${p.player_id}`}
-                  onClick={() => setSelectedPitcher(p)}
-                  className={selectedPitcher?.player_id === p.player_id ? 'selected' : ''}
-                >
-                  #{p.player_id} {p.first_name} {p.last_name}
-                </button>
-              ))}
+              {players.length === 0 ? (
+                <p>No players available</p>
+              ) : (
+                players.map((p) => (
+                  <button
+                    key={`player-${p.player_id}`}
+                    onClick={() => setSelectedPlayer(p)}
+                    className={selectedPlayer?.player_id === p.player_id ? 'selected' : ''}
+                  >
+                    #{p.player_id} {p.first_name} {p.last_name}
+                  </button>
+                ))
+              )}
             </div>
 
-            <h3>4️⃣ Select Batter</h3>
-            <div className="button-group scrollable-group">
-              {batters.map((p) => (
-                <button
-                  key={`batter-${p.player_id}`}
-                  onClick={() => handlePlayerClick(p)}
-                >
-                  #{p.player_id} {p.first_name} {p.last_name}
-                </button>
+            {selectedStat && selectedPlayer && (
+              <button
+                style={{
+                  marginTop: '1rem',
+                  backgroundColor: '#28a745',
+                  color: 'white',
+                  padding: '0.6rem 1.2rem',
+                  fontWeight: 'bold',
+                  borderRadius: '8px',
+                  border: 'none',
+                  cursor: 'pointer'
+                }}
+                onClick={handleAddStat}
+              >
+                ✅ Add Stat to DB
+              </button>
+            )}
+
+            <h3>🧪 Debug: Raw Player List</h3>
+            <ul style={{
+              textAlign: 'left',
+              maxHeight: '150px',
+              overflowY: 'auto',
+              border: '1px solid #ccc',
+              padding: '0.5rem',
+              borderRadius: '8px'
+            }}>
+              {players.map((p) => (
+                <li key={p.player_id}>
+                  #{p.player_id} {p.first_name} {p.last_name} — {p.position ?? 'N/A'}
+                </li>
               ))}
-            </div>
+            </ul>
 
             <div style={{ marginTop: '1rem', textAlign: 'left' }}>
-              <p><strong>Selected Event:</strong> {selectedEvent || 'None'}</p>
-              <p><strong>Selected Pitcher:</strong> {selectedPitcher ? `${selectedPitcher.first_name} ${selectedPitcher.last_name}` : 'None'}</p>
+              <p><strong>Selected Stat:</strong> {selectedStat || 'None'}</p>
+              <p><strong>Selected Player:</strong> {selectedPlayer ? `${selectedPlayer.first_name} ${selectedPlayer.last_name}` : 'None'}</p>
             </div>
 
             <h3>📜 Event Log</h3>

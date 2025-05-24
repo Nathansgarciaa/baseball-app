@@ -8,6 +8,7 @@ import ViewGames from './components/ViewGames';
 import GameCast from './components/GameCast';
 
 
+import GameStats from './components/GameStats';
 
 import RosterScreen from './components/RosterScreen'; // adjust path if needed
 
@@ -25,7 +26,7 @@ function App() {
         <Route path="/team/:id/games" element={<ViewGames />} />
         <Route path="/game/:id" element={<GameCast />} />
         <Route path="/team/:id/roster" element={<RosterScreen />} />
-
+        <Route path="/game/:id/stats" element={<GameStats />} />
         <Route path="/home" element={<Home />} />
       </Routes>
     </Router>

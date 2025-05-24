@@ -27,3 +27,14 @@ exports.getPlayersWithStats = async (req, res) => {
     res.status(500).json({ error: 'Failed to fetch roster with stats' });
   }
 };
+exports.getTeamsByCoach = (req, res) => {
+  const coachUserId = parseInt(req.params.id);
+
+  teamService.getTeamsByCoach(coachUserId, (err, teams) => {
+    if (err) {
+      console.error('❌ Failed to get user’s teams:', err);
+      return res.status(500).json({ error: 'Failed to fetch teams' });
+    }
+    res.json(teams);
+  });
+};

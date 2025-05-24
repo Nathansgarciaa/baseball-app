@@ -45,3 +45,7 @@ exports.fetchPlayersWithStats = (teamId) => {
     });
   });
 };
+exports.getTeamsByCoach = (coachUserId, cb) => {
+  const query = `SELECT * FROM team WHERE coach_user_id = ?`;
+  db.query(query, [coachUserId], cb);
+};

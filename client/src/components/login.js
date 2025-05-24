@@ -9,17 +9,27 @@ function Login() {
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    const endpoint = isSignup ? 'signup' : 'login';
+  e.preventDefault();
+  const endpoint = isSignup ? 'signup' : 'login';
 
-    try {
-      const res = await axios.post(`http://localhost:3001/auth/${endpoint}`, form); // ✅ fixed
-      alert(res.data.message);
-      if (!isSignup) navigate('/home'); // Redirect after login
-    } catch (err) {
-      alert(err.response?.data?.message || 'Error occurred');
+  try {
+    const res = await axios.post(`http://localhost:3001/auth/${endpoint}`, form);
+
+    alert(res.data.message);
+
+    if (!isSignup) {
+      // ✅ Save user ID to localStorage
+      localStorage.setItem('userId', res.data.user.user_id);
+      localStorage.setItem('username', res.data.user.username); // optional
+
+      // ✅ Now redirect to Home
+      navigate('/home');
     }
-  };
+  } catch (err) {
+    alert(err.response?.data?.message || 'Error occurred');
+  }
+};
+
 
   return (
     <div className="auth-container">

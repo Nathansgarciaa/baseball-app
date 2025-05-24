@@ -16,13 +16,23 @@ exports.signup = async (req, res) => {
 
 exports.login = (req, res) => {
   const { username, password } = req.body;
+
   authService.findUserByUsername(username, async (err, results) => {
     if (err || results.length === 0) {
       return res.status(400).json({ message: 'Invalid credentials' });
     }
-    const valid = await bcrypt.compare(password, results[0].password);
+
+    const user = results[0];
+    const valid = await bcrypt.compare(password, user.password);
     if (!valid) return res.status(401).json({ message: 'Incorrect password' });
 
-    res.json({ message: 'Login successful', user: username });
+    // ✅ Return user_id and username so frontend can store it
+    res.json({
+      message: 'Login successful',
+      user: {
+        user_id: user.user_id,
+        username: user.username
+      }
+    });
   });
 };

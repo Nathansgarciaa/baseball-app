@@ -16,7 +16,13 @@ function Home() {
   }, []);
 
   const fetchTeams = () => {
-    fetch('http://localhost:3001/team')
+    const userId = localStorage.getItem('userId');
+    if (!userId) {
+      console.error("❌ No user ID found in localStorage");
+      return;
+    }
+
+    fetch(`http://localhost:3001/team/user/${userId}`)
       .then(res => res.json())
       .then(data => setTeams(data))
       .catch(err => console.error('Fetch error:', err));
@@ -25,18 +31,35 @@ function Home() {
   const handleSubmit = (e) => {
     e.preventDefault();
 
+    const userId = localStorage.getItem('userId');
+    if (!userId) {
+      alert("You're not logged in. Can't create team.");
+      return;
+    }
+
+    const teamData = {
+      ...formData,
+      coach_user_id: parseInt(userId)
+    };
+
     fetch('http://localhost:3001/team', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(formData)
+      body: JSON.stringify(teamData)
     })
-      .then(res => res.json())
+      .then(res => {
+        if (!res.ok) throw new Error("Failed to create team");
+        return res.json();
+      })
       .then(() => {
         setShowForm(false);
         setFormData({ team_name: '', city_name: '', state: '' });
-        fetchTeams(); // Refresh team list
+        fetchTeams(); // refresh list
       })
-      .catch(err => console.error('POST error:', err));
+      .catch(err => {
+        console.error('POST error:', err);
+        alert('❌ Failed to create team');
+      });
   };
 
   return (

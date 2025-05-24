@@ -4,7 +4,7 @@ const teamController = require('../controllers/teamController');
 
 router.get('/', teamController.getAllTeams);
 router.post('/', teamController.createTeam);
-
+router.get('/user/:id', teamController.getTeamsByCoach);
 router.get('/:id/players-with-stats', teamController.getPlayersWithStats);
 
 
